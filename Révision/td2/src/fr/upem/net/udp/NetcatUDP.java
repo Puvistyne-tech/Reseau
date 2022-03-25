@@ -23,8 +23,10 @@ public class NetcatUDP {
         var server = new InetSocketAddress(args[0], Integer.parseInt(args[1]));
         var cs = Charset.forName(args[2]);
         var buffer = ByteBuffer.allocate(BUFFER_SIZE);
-        var bb = ByteBuffer.allocate(BUFFER_SIZE);
-        DatagramChannel dc = DatagramChannel.open();
+        var rBuffer = ByteBuffer.allocate(BUFFER_SIZE);
+
+
+        var dc = DatagramChannel.open();
         dc.bind(null);
 
 
@@ -34,15 +36,13 @@ public class NetcatUDP {
                 // TODO
                 buffer.put(cs.encode(line));
                 buffer.flip();
-
                 dc.send(buffer, server);
                 buffer.clear();
 
-                InetSocketAddress exp = (InetSocketAddress) dc.receive(bb);
-                bb.flip();
-                System.out.println("Received " + bb.remaining() + " bytes from " + exp);
-                System.out.println("String :" + cs.decode(bb));
-                bb.clear();
+                var sender = (InetSocketAddress) dc.receive(rBuffer);
+                rBuffer.flip();
+                System.out.println("Received " + cs.decode(rBuffer) + ", " + rBuffer.remaining() + " bytes from " + sender);
+                rBuffer.clear();
             }
         }
         dc.close();

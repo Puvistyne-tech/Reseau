@@ -34,7 +34,15 @@ public class Context {
      */
 
     private void process() {
-        // TODO
+
+        bufferIn.flip();
+        while (bufferIn.remaining() >= Integer.BYTES * 2 && bufferOut.remaining() >= Integer.BYTES) {
+            var one = bufferIn.getInt();
+            var two = bufferIn.getInt();
+            System.out.println("==> Receiving from clint " + one + ", " + two);
+            bufferOut.putInt(one + two);
+        }
+        bufferIn.compact();
     }
 
     /**
@@ -47,10 +55,36 @@ public class Context {
      */
 
     private void updateInterestOps() {
-        // TODO
+//        if (!closed) {
+//            if (bufferIn.hasRemaining()) {
+//                key.interestOps(SelectionKey.OP_READ);
+//            }
+//        } else {
+//            silentlyClose();
+//            return;
+//        }
+//        if (bufferOut.position() != 0) {
+//            key.interestOps(SelectionKey.OP_WRITE);
+//        }
+
+        int interestOps = 0;
+        if (!closed && bufferIn.hasRemaining()) {
+            interestOps |= SelectionKey.OP_READ;
+        }
+        if (bufferOut.position() != 0) {
+            interestOps |= SelectionKey.OP_WRITE;
+        }
+
+        if (interestOps == 0) {
+            silentlyClose();
+            return;
+        }
+        key.interestOps(interestOps);
+
     }
 
     private void silentlyClose() {
+
         try {
             sc.close();
         } catch (IOException e) {

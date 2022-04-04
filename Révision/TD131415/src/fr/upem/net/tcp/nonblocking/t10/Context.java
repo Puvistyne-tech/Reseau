@@ -29,9 +29,9 @@ public class Context {
         // TODO
 
         if (closed) {
-            key.interestOps(SelectionKey.OP_ACCEPT);
+            key.interestOps(SelectionKey.OP_WRITE);
         } else {
-            if (buffer.capacity() == buffer.remaining()) {
+            if (buffer.position()==0) {
                 key.interestOps(SelectionKey.OP_READ);
             } else {
                 key.interestOps(SelectionKey.OP_WRITE);

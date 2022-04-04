@@ -21,7 +21,7 @@ public class Context {
     private final ByteBuffer bufferOut = ByteBuffer.allocate(BUFFER_SIZE);
     private boolean closed = false;
 
-    private Context(SelectionKey key) {
+    public Context(SelectionKey key) {
         this.key = key;
         this.sc = (SocketChannel) key.channel();
     }
@@ -69,6 +69,14 @@ public class Context {
 
     void doRead() throws IOException {
         // TODO
+        if (sc.read(bufferIn) == -1) {
+            System.err.println("Connection closed by " + sc.getRemoteAddress());
+            closed = true;
+        }
+
+        process();
+        updateInterestOps();
+
     }
 
     /**
@@ -81,7 +89,16 @@ public class Context {
      */
 
     void doWrite() throws IOException {
-        // TODO
+
+        bufferOut.flip();
+        System.out.println("<== Sending .... ");
+
+        sc.write(bufferOut);
+
+        bufferOut.compact();
+        updateInterestOps();
+
+
     }
 
 
